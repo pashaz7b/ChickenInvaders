@@ -16,16 +16,18 @@ public class Main extends PApplet {
     private SoundFile notificationSound;
     private boolean mouseWasOverstartButton = false;
     private boolean mouseWasOverExitButton = false;
+    private boolean gameOver = false;
     private int currentWave = 1;
     private int killedChickens = 0;
     private final int totalWaves = 3;
+    public static String[] chickenImages = {"chicken1.png", "chicken2.png", "chicken3.png"};
 
     public void setup() {
         pApplet = this;
         chicken = new Chicken(0, 0);
         Spaceship.spaceshipImage = loadImage("spaceship1.png");
         spaceship = new Spaceship();
-        Chicken.chickenImage = loadImage("chicken1.png");
+        updateChickenImage();
         chicken.createChickens();
 
         // Load custom font, background image, and sound
@@ -37,16 +39,19 @@ public class Main extends PApplet {
     public void draw() {
         if (startMenu) {
             drawStartMenu();
-        } else {
+        } else if (!gameOver) {
             background(128, 52, 235);
             drawWaveInfo();
-            chicken.display();
+            chicken.display(screenWidth);
             spaceship.drawSpaceship();
             for (Missile missile : missiles) {
                 missile.update();
                 missile.drawMissile();
             }
             checkCollisions();
+            checkGameOver();
+        } else {
+            drawGameOverMessage();
         }
     }
 
@@ -62,6 +67,20 @@ public class Main extends PApplet {
         float bottomMissile = missile.getY() + missile.getMissileHeight();
 
         return leftMissile < rightChicken && rightMissile > leftChicken && topMissile < bottomChicken && bottomMissile > topChicken;
+    }
+
+    private boolean collidesWithSpaceship(Chicken chicken, Spaceship spaceship) {
+        float leftChicken = chicken.getX();
+        float rightChicken = chicken.getX() + chicken.getWidth();
+        float topChicken = chicken.getY();
+        float bottomChicken = chicken.getY() + chicken.getHeight();
+
+        float leftSpaceship = spaceship.getxPos();
+        float rightSpaceship = spaceship.getxPos() + spaceship.getSpaceshipWidth();
+        float topSpaceship = spaceship.getyPos();
+        float bottomSpaceship = spaceship.getyPos() + spaceship.getSpaceshipHeight();
+
+        return leftSpaceship < rightChicken && rightSpaceship > leftChicken && topSpaceship < bottomChicken && bottomSpaceship > topChicken;
     }
 
     private void checkCollisions() {
@@ -89,8 +108,32 @@ public class Main extends PApplet {
         // Check if all chickens are killed and start the next wave if there are more waves
         if (killedChickens == chickensPerWave && currentWave < totalWaves) {
             currentWave++;
+            updateChickenImage(); // Update the chicken image
             chicken.createChickens();
             killedChickens = 0;
+        }
+    }
+
+    private void checkGameOver() {
+        for (Chicken currentChicken : Chicken.chickens) {
+            // Check if the chicken touched the spaceship
+            if (collidesWithSpaceship(currentChicken, spaceship)) {
+                gameOver = true;
+                break;
+            }
+
+            // Check if the chicken touched the bottom of the screen
+            if (currentChicken.getY() + currentChicken.getHeight() >= screenHeight) {
+                gameOver = true;
+                break;
+            }
+        }
+    }
+
+    public void updateChickenImage() {
+        int index = currentWave - 1;
+        if (index < chickenImages.length) {
+            Chicken.chickenImage = loadImage(chickenImages[index]);
         }
     }
 
@@ -149,6 +192,14 @@ public class Main extends PApplet {
         text("Exit Game", screenWidth / 2, screenHeight / 2 + 86);
     }
 
+    private void drawGameOverMessage() {
+        background(128, 52, 235);
+        textFont(pressStartFont, 24);
+        fill(255, 0, 0); // Change the message color to red
+        textAlign(CENTER);
+        text("Game Over!", screenWidth / 2, screenHeight / 2);
+    }
+
     public void mouseClicked() {
         if (startMenu) {
             // Check if the mouse was clicked inside the start button
@@ -165,8 +216,8 @@ public class Main extends PApplet {
 
     public void mousePressed() {
         if (!startMenu) {
-            float missileX = spaceship.getXPos();
-            float missileY = spaceship.getYPos() - spaceship.getSpaceshipHeight() / 2;
+            float missileX = spaceship.getxPos();
+            float missileY = spaceship.getyPos() - spaceship.getSpaceshipHeight() / 2;
             missiles.add(new Missile(missileX, missileY));
         }
     }

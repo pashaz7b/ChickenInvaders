@@ -1,12 +1,12 @@
 import java.util.*;
 import processing.core.PImage;
 
-public class Chicken {
+public class Chicken implements ChickenInterface {
 
     public static ArrayList<Chicken> chickens = new ArrayList<>();
     public static PImage chickenImage;
-    private final int width = 50;
-    private final int height = 40;
+    private final int width =60;
+    private final int height = 48;
     private float x;
     private float y;
     private float speedX;
@@ -34,23 +34,25 @@ public class Chicken {
         }
     }
 
-    public void update() {
+    public void update(int screenWidth) {
         x += speedX;
 
         // Change direction if the chicken hits the screen edges
-        if (x <= 0 || x + width >= Main.pApplet.width) {
+        if (x <= 0 || x + width >= screenWidth) {
             speedX = -speedX;
             y += height;
         }
     }
 
-    public void display() {
+    public void display(int screenWidth) {
         for (Chicken chicken : chickens) {
-            chicken.update();
+            chicken.update(screenWidth);
             // Draw the chicken image instead of a rectangle
             Main.pApplet.image(chickenImage, chicken.getX(), chicken.getY(), chicken.getWidth(), chicken.getHeight());
         }
     }
+
+    //*******************************************************************
 
     // Getters and setters
     public static ArrayList<Chicken> getChickens() {

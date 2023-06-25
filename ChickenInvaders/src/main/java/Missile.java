@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class Missile {
+public class Missile implements MissileInterface{
     private float x;
     private float y;
     private float speed;
