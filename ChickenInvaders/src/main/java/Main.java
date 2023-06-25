@@ -22,15 +22,15 @@ public class Main extends PApplet {
 
     public void setup() {
         pApplet = this;
-        chicken = new Chicken(0, 0, 0, 0, 0);
-        Spaceship.spaceshipImage = loadImage("spaceship3.png");
+        chicken = new Chicken(0, 0);
+        Spaceship.spaceshipImage = loadImage("spaceship1.png");
         spaceship = new Spaceship();
-        Chicken.chickenImage = loadImage("chicken2.png");
+        Chicken.chickenImage = loadImage("chicken1.png");
         chicken.createChickens();
 
         // Load custom font, background image, and sound
         pressStartFont = createFont("PressStart2P-Regular.ttf", 24);
-        startMenuBackground = loadImage("start_menu_background4.jpg");
+        startMenuBackground = loadImage("start_menu_background1.jpg");
         notificationSound = new SoundFile(this, "notification_sound.wav");
     }
 
@@ -42,12 +42,10 @@ public class Main extends PApplet {
             drawWaveInfo();
             chicken.display();
             spaceship.drawSpaceship();
-
             for (Missile missile : missiles) {
                 missile.update();
                 missile.drawMissile();
             }
-
             checkCollisions();
         }
     }
