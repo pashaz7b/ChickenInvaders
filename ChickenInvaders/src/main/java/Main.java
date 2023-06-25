@@ -16,11 +16,16 @@ public class Main extends PApplet {
     private SoundFile notificationSound;
     private boolean mouseWasOverstartButton = false;
     private boolean mouseWasOverExitButton = false;
+    private int currentWave = 1;
+    private int killedChickens = 0;
+    private final int totalWaves = 3;
 
     public void setup() {
         pApplet = this;
         chicken = new Chicken(0, 0, 0, 0, 0);
+        Spaceship.spaceshipImage = loadImage("spaceship3.png");
         spaceship = new Spaceship();
+        Chicken.chickenImage = loadImage("chicken2.png");
         chicken.createChickens();
 
         // Load custom font, background image, and sound
@@ -33,7 +38,8 @@ public class Main extends PApplet {
         if (startMenu) {
             drawStartMenu();
         } else {
-            background(0);
+            background(128, 52, 235);
+            drawWaveInfo();
             chicken.display();
             spaceship.drawSpaceship();
 
@@ -61,6 +67,8 @@ public class Main extends PApplet {
     }
 
     private void checkCollisions() {
+        int chickensPerWave = 4 * 4; // This should match the rows * cols in createChickens()
+
         Iterator<Chicken> chickenIterator = Chicken.chickens.iterator();
         while (chickenIterator.hasNext()) {
             Chicken currentChicken = chickenIterator.next();
@@ -73,10 +81,25 @@ public class Main extends PApplet {
                     // Remove the chicken and missile from their respective lists
                     chickenIterator.remove();
                     missileIterator.remove();
+                    // Increment the killedChickens counter
+                    killedChickens++;
                     break;
                 }
             }
         }
+
+        // Check if all chickens are killed and start the next wave if there are more waves
+        if (killedChickens == chickensPerWave && currentWave < totalWaves) {
+            currentWave++;
+            chicken.createChickens();
+            killedChickens = 0;
+        }
+    }
+
+    private void drawWaveInfo() {
+        pApplet.textSize(14);
+        pApplet.fill(255,0,0); // White text color
+        pApplet.text("Wave: " + currentWave, 60, 20); // Display the wave number at the top-left corner
     }
 
     public void drawStartMenu() {

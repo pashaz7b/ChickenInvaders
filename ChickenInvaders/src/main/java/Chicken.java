@@ -1,11 +1,12 @@
 import java.util.*;
+import processing.core.PImage;
 
 public class Chicken {
 
    public static ArrayList<Chicken> chickens = new ArrayList<>();
-
-    private final int width = 40;
-    private final int height = 30;
+    public static PImage chickenImage;
+    private final int width = 50;
+    private final int height = 40;
     private float x;
     private float y;
     private float speedX;
@@ -23,23 +24,23 @@ public class Chicken {
     }
 
    public void createChickens() {
-        int rows = 5;
-        int cols = 8;
-        float startX = 30;
-        float startY = 30;
-        float xOffset = 50;
-        float yOffset = 50;
+       int rows = 4;
+       int cols = 4; // Change the number of columns here
+       float startX = 30;
+       float startY = 30;
+       float xOffset = 90;
+       float yOffset = 90;
 
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                int randomR = (int) Main.pApplet.random(256);
-                int randomG = (int) Main.pApplet.random(256);
-                int randomB = (int) Main.pApplet.random(256);
-                float x = startX + j * xOffset;
-                float y = startY + i * yOffset;
-                chickens.add(new Chicken(x, y, randomR, randomG, randomB));
-            }
-        }
+       for (int i = 0; i < rows; i++) {
+           for (int j = 0; j < cols; j++) {
+               int randomR = (int) Main.pApplet.random(256);
+               int randomG = (int) Main.pApplet.random(256);
+               int randomB = (int) Main.pApplet.random(256);
+               float x = startX + j * xOffset;
+               float y = startY + i * yOffset;
+               chickens.add(new Chicken(x, y, randomR, randomG, randomB));
+           }
+       }
     }
 
    public void update() {
@@ -55,8 +56,8 @@ public class Chicken {
     public void display() {
         for (Chicken chicken : chickens) {
             chicken.update();
-            Main.pApplet.fill(chicken.getColorR(), chicken.getColorG(), chicken.getColorB());
-            Main.pApplet.rect(chicken.getX(), chicken.getY(), chicken.getWidth(), chicken.getHeight());
+            // Draw the chicken image instead of a rectangle
+            Main.pApplet.image(chickenImage, chicken.getX(), chicken.getY(), chicken.getWidth(), chicken.getHeight());
         }
     }
 

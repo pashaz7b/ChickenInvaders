@@ -1,6 +1,8 @@
 import java.util.*;
+import processing.core.PImage;
 
 public class Spaceship {
+    public static PImage spaceshipImage;
     private final int width = 400;
     private final int height = 700;
     private int spaceshipColor;
@@ -12,8 +14,8 @@ public class Spaceship {
     public Spaceship() {
         // Creating spaceship
         spaceshipColor = Main.pApplet.color(255, 0, 0);
-        spaceshipWidth = 40;
-        spaceshipHeight = 20;
+        spaceshipWidth = 100;
+        spaceshipHeight = 80;
         xPos = width / 2;
         yPos = height - 50;
     }
@@ -23,14 +25,8 @@ public class Spaceship {
         xPos = Main.pApplet.mouseX;
 
         // Draw spaceship
-        Main.pApplet.stroke(0);
-        Main.pApplet.fill(spaceshipColor);
-        Main.pApplet.rectMode(Main.pApplet.CENTER);
-        Main.pApplet.rect(xPos, yPos, spaceshipWidth, spaceshipHeight);
-
-        // Draw spaceship top
-        Main.pApplet.fill(spaceshipColor);
-        Main.pApplet.triangle(xPos - spaceshipWidth / 2, yPos, xPos, yPos - spaceshipHeight / 2, xPos + spaceshipWidth / 2, yPos);
+        Main.pApplet.imageMode(Main.pApplet.CENTER);
+        Main.pApplet.image(spaceshipImage, xPos, yPos, spaceshipWidth, spaceshipHeight);
     }
 
     public float getXPos() {
