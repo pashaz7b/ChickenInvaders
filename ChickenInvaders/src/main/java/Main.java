@@ -41,6 +41,41 @@ public class Main extends PApplet {
                 missile.update();
                 missile.drawMissile();
             }
+
+            checkCollisions();
+        }
+    }
+
+    private boolean collides(Chicken chicken, Missile missile) {
+        float leftChicken = chicken.getX();
+        float rightChicken = chicken.getX() + chicken.getWidth();
+        float topChicken = chicken.getY();
+        float bottomChicken = chicken.getY() + chicken.getHeight();
+
+        float leftMissile = missile.getX();
+        float rightMissile = missile.getX() + missile.getMissileWidth();
+        float topMissile = missile.getY();
+        float bottomMissile = missile.getY() + missile.getMissileHeight();
+
+        return leftMissile < rightChicken && rightMissile > leftChicken && topMissile < bottomChicken && bottomMissile > topChicken;
+    }
+
+    private void checkCollisions() {
+        Iterator<Chicken> chickenIterator = Chicken.chickens.iterator();
+        while (chickenIterator.hasNext()) {
+            Chicken currentChicken = chickenIterator.next();
+            Iterator<Missile> missileIterator = missiles.iterator();
+            while (missileIterator.hasNext()) {
+                Missile currentMissile = missileIterator.next();
+
+                // Check for collision between the current chicken and missile
+                if (collides(currentChicken, currentMissile)) {
+                    // Remove the chicken and missile from their respective lists
+                    chickenIterator.remove();
+                    missileIterator.remove();
+                    break;
+                }
+            }
         }
     }
 
