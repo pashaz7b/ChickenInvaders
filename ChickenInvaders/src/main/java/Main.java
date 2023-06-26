@@ -23,6 +23,7 @@ public class Main extends PApplet {
     public static String[] chickenImages = {"chicken1.png", "chicken2.png", "chicken3.png"};
     Score score = new Score();
     private boolean gameWon = false;
+    private SoundFile chickenHitSound;
 
     public void setup() {
         pApplet = this;
@@ -36,6 +37,7 @@ public class Main extends PApplet {
         pressStartFont = createFont("PressStart2P-Regular.ttf", 24);
         startMenuBackground = loadImage("start_menu_background1.jpg");
         notificationSound = new SoundFile(this, "notification_sound.wav");
+        chickenHitSound = new SoundFile(this, "chicken_hit_sound.wav");
     }
 
     public void draw() {
@@ -100,6 +102,9 @@ public class Main extends PApplet {
 
                 // Check for collision between the current chicken and missile
                 if (collides(currentChicken, currentMissile)) {
+
+                    // Play chicken hit sound
+                    chickenHitSound.play();
                     // Decrease the chicken's resistance
                     currentChicken.decreaseResistance();
                     missileIterator.remove();
