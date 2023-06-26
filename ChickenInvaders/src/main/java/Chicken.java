@@ -10,10 +10,12 @@ public class Chicken implements ChickenInterface {
     private float x;
     private float y;
     private float speedX;
+    private int resistance;
 
-    public Chicken(float x, float y) {
+    public Chicken(float x, float y,int resistance) {
         this.x = x;
         this.y = y;
+        this.resistance = resistance;
         this.speedX = 1;
     }
 
@@ -24,12 +26,13 @@ public class Chicken implements ChickenInterface {
         float startY = 30;
         float xOffset = 90;
         float yOffset = 90;
+        int resistance = Main.currentWave;
 
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 float x = startX + j * xOffset;
                 float y = startY + i * yOffset;
-                chickens.add(new Chicken(x, y));
+                chickens.add(new Chicken(x, y,resistance));
             }
         }
     }
@@ -50,6 +53,10 @@ public class Chicken implements ChickenInterface {
             // Draw the chicken image instead of a rectangle
             Main.pApplet.image(chickenImage, chicken.getX(), chicken.getY(), chicken.getWidth(), chicken.getHeight());
         }
+    }
+
+    public void decreaseResistance() {
+        resistance--;
     }
 
     //*******************************************************************
@@ -93,5 +100,13 @@ public class Chicken implements ChickenInterface {
 
     public void setSpeedX(float speedX) {
         this.speedX = speedX;
+    }
+
+    public int getResistance() {
+        return resistance;
+    }
+
+    public void setResistance(int resistance) {
+        this.resistance = resistance;
     }
 }

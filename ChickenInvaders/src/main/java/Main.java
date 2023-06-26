@@ -17,18 +17,21 @@ public class Main extends PApplet {
     private boolean mouseWasOverstartButton = false;
     private boolean mouseWasOverExitButton = false;
     private boolean gameOver = false;
-    private int currentWave = 1;
+    public static int currentWave = 1;
     private int killedChickens = 0;
     private final int totalWaves = 3;
     public static String[] chickenImages = {"chicken1.png", "chicken2.png", "chicken3.png"};
+    private Score score;
 
     public void setup() {
         pApplet = this;
-        chicken = new Chicken(0, 0);
+        chicken = new Chicken(0, 0,currentWave);
         Spaceship.spaceshipImage = loadImage("spaceship1.png");
         spaceship = new Spaceship();
         updateChickenImage();
         chicken.createChickens();
+        score = new Score(currentWave);
+        score.increaseScore();
 
         // Load custom font, background image, and sound
         pressStartFont = createFont("PressStart2P-Regular.ttf", 24);
@@ -95,12 +98,16 @@ public class Main extends PApplet {
 
                 // Check for collision between the current chicken and missile
                 if (collides(currentChicken, currentMissile)) {
-                    // Remove the chicken and missile from their respective lists
-                    chickenIterator.remove();
+                    // Decrease the chicken's resistance
+                    currentChicken.decreaseResistance();
                     missileIterator.remove();
-                    // Increment the killedChickens counter
-                    killedChickens++;
-                    break;
+
+                // If the chicken's resistance reaches 0, remove the chicken and increment the killedChickens counter
+                if (currentChicken.getResistance() == 0) {
+                      chickenIterator.remove();
+                      killedChickens++;
+                   }
+                  break;
                 }
             }
         }
@@ -193,11 +200,11 @@ public class Main extends PApplet {
     }
 
     private void drawGameOverMessage() {
-        background(128, 52, 235);
-        textFont(pressStartFont, 24);
-        fill(255, 0, 0); // Change the message color to red
-        textAlign(CENTER);
-        text("Game Over!", screenWidth / 2, screenHeight / 2);
+        background(0);
+        textSize(24);
+        fill(255);
+        textAlign(CENTER, CENTER);
+        text("GAME OVER", screenWidth / 2, screenHeight / 2);
     }
 
     public void mouseClicked() {
@@ -219,6 +226,16 @@ public class Main extends PApplet {
             float missileX = spaceship.getxPos();
             float missileY = spaceship.getyPos() - spaceship.getSpaceshipHeight() / 2;
             missiles.add(new Missile(missileX, missileY));
+        }
+    }
+
+    public void keyPressed() {
+        if (!startMenu && !gameOver) {
+            if (key == ' ') {
+                float missileX = spaceship.getxPos();
+                float missileY = spaceship.getyPos() - spaceship.getSpaceshipHeight() / 2;
+                missiles.add(new Missile(missileX, missileY));
+            }
         }
     }
 
