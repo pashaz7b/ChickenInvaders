@@ -21,7 +21,8 @@ public class Main extends PApplet {
     private int killedChickens = 0;
     private final int totalWaves = 3;
     public static String[] chickenImages = {"chicken1.png", "chicken2.png", "chicken3.png"};
-    private Score score;
+    Score score = new Score();
+    private boolean gameWon = false;
 
     public void setup() {
         pApplet = this;
@@ -30,8 +31,6 @@ public class Main extends PApplet {
         spaceship = new Spaceship();
         updateChickenImage();
         chicken.createChickens();
-        score = new Score(currentWave);
-        score.increaseScore();
 
         // Load custom font, background image, and sound
         pressStartFont = createFont("PressStart2P-Regular.ttf", 24);
@@ -42,9 +41,10 @@ public class Main extends PApplet {
     public void draw() {
         if (startMenu) {
             drawStartMenu();
-        } else if (!gameOver) {
+        } else if (!gameOver && !gameWon) {
             background(128, 52, 235);
             drawWaveInfo();
+            score.drawScoreInfo();
             chicken.display(screenWidth);
             spaceship.drawSpaceship();
             for (Missile missile : missiles) {
@@ -53,8 +53,10 @@ public class Main extends PApplet {
             }
             checkCollisions();
             checkGameOver();
-        } else {
+        } else if (gameOver) {
             drawGameOverMessage();
+        } else if (gameWon) {
+            drawGameWonMessage();
         }
     }
 
@@ -102,12 +104,13 @@ public class Main extends PApplet {
                     currentChicken.decreaseResistance();
                     missileIterator.remove();
 
-                // If the chicken's resistance reaches 0, remove the chicken and increment the killedChickens counter
-                if (currentChicken.getResistance() == 0) {
-                      chickenIterator.remove();
-                      killedChickens++;
-                   }
-                  break;
+                    // If the chicken's resistance reaches 0, remove the chicken and increment the killedChickens counter
+                    if (currentChicken.getResistance() == 0) {
+                        chickenIterator.remove();
+                        score.increaseScore(currentWave);
+                        killedChickens++;
+                    }
+                    break;
                 }
             }
         }
@@ -118,6 +121,9 @@ public class Main extends PApplet {
             updateChickenImage(); // Update the chicken image
             chicken.createChickens();
             killedChickens = 0;
+        }
+        else if (killedChickens == chickensPerWave && currentWave == totalWaves) {
+            gameWon = true;
         }
     }
 
@@ -134,6 +140,7 @@ public class Main extends PApplet {
                 gameOver = true;
                 break;
             }
+
         }
     }
 
@@ -147,7 +154,7 @@ public class Main extends PApplet {
     private void drawWaveInfo() {
         pApplet.textSize(14);
         pApplet.fill(255,0,0); // White text color
-        pApplet.text("Wave: " + currentWave, 60, 20); // Display the wave number at the top-left corner
+        pApplet.text("Wave:" + currentWave , 350, 20); // Display the wave number at the top-left corner
     }
 
     public void drawStartMenu() {
@@ -205,6 +212,14 @@ public class Main extends PApplet {
         fill(255);
         textAlign(CENTER, CENTER);
         text("GAME OVER", screenWidth / 2, screenHeight / 2);
+    }
+
+    private void drawGameWonMessage() {
+        background(0);
+        textSize(24);
+        fill(255);
+        textAlign(CENTER, CENTER);
+        text("YOU WIN!", screenWidth / 2, screenHeight / 2);
     }
 
     public void mouseClicked() {
