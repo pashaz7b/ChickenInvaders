@@ -16,6 +16,7 @@ public class Main extends PApplet {
     private SoundFile notificationSound;
     private boolean mouseWasOverstartButton = false;
     private boolean mouseWasOverExitButton = false;
+    private boolean mouseWasOverHelpButton = false;
     private boolean gameOver = false;
     public static int currentWave = 1;
     private int killedChickens = 0;
@@ -24,10 +25,13 @@ public class Main extends PApplet {
     Score score = new Score();
     private boolean gameWon = false;
     private SoundFile chickenHitSound;
+    float time = 400;
+    float changeTime = 0.1f;
+    PImage gameBackground;
 
     public void setup() {
         pApplet = this;
-        chicken = new Chicken(0, 0,currentWave);
+        chicken = new Chicken(0, 0, currentWave);
         Spaceship.spaceshipImage = loadImage("spaceship1.png");
         spaceship = new Spaceship();
         updateChickenImage();
@@ -38,13 +42,15 @@ public class Main extends PApplet {
         startMenuBackground = loadImage("start_menu_background1.jpg");
         notificationSound = new SoundFile(this, "notification_sound.wav");
         chickenHitSound = new SoundFile(this, "chicken_hit_sound.wav");
+        gameBackground = loadImage("gameBackground.jpg");
     }
 
     public void draw() {
         if (startMenu) {
             drawStartMenu();
+            keyPressed();
         } else if (!gameOver && !gameWon) {
-            background(128, 52, 235);
+            background(gameBackground);
             drawWaveInfo();
             score.drawScoreInfo();
             chicken.display(screenWidth);
@@ -53,12 +59,20 @@ public class Main extends PApplet {
                 missile.update();
                 missile.drawMissile();
             }
+
+            stroke(255, 0, 0);
+            strokeWeight(8);
+            time -= changeTime;
+            line(0, 689, time, 689);
+            noStroke();
             checkCollisions();
             checkGameOver();
+
         } else if (gameOver) {
             drawGameOverMessage();
         } else if (gameWon) {
             drawGameWonMessage();
+            score.saveScore();
         }
     }
 
@@ -126,8 +140,7 @@ public class Main extends PApplet {
             updateChickenImage(); // Update the chicken image
             chicken.createChickens();
             killedChickens = 0;
-        }
-        else if (killedChickens == chickensPerWave && currentWave == totalWaves) {
+        } else if (killedChickens == chickensPerWave && currentWave == totalWaves) {
             gameWon = true;
         }
     }
@@ -146,6 +159,11 @@ public class Main extends PApplet {
                 break;
             }
 
+            // Check if time is less than or equal to 0
+            if (time <= 0) {
+                gameOver = true;
+                break;
+            }
         }
     }
 
@@ -158,8 +176,8 @@ public class Main extends PApplet {
 
     private void drawWaveInfo() {
         pApplet.textSize(14);
-        pApplet.fill(255,0,0); // White text color
-        pApplet.text("Wave:" + currentWave , 350, 20); // Display the wave number at the top-left corner
+        pApplet.fill(255, 0, 0); // White text color
+        pApplet.text("Wave:" + currentWave, 350, 20); // Display the wave number at the top-left corner
     }
 
     public void drawStartMenu() {
@@ -184,9 +202,16 @@ public class Main extends PApplet {
         rectMode(CENTER);
         rect(screenWidth / 2, screenHeight / 2 + 80, 200, 60, 10);
 
+        //Help button background
+        noStroke();
+        fill(255, 0, 0, 180);// Change the button background color to a lighter red
+        rectMode(CENTER);
+        rect(screenWidth / 2, screenHeight / 2 + 160, 200, 60, 10);
+
         // Check if the mouse is over the start button
         boolean mouseOverstartButton = mouseX > screenWidth / 2 - 100 && mouseX < screenWidth / 2 + 100 && mouseY > screenHeight / 2 - 30 && mouseY < screenHeight / 2 + 30;
         boolean mouseOverExitButton = mouseX > screenWidth / 2 - 100 && mouseX < screenWidth / 2 + 100 && mouseY > screenHeight / 2 + 50 && mouseY < screenHeight / 2 + 110;
+        boolean mouseOverHelpButton = mouseX > screenWidth / 2 - 100 && mouseX < screenWidth / 2 + 100 && mouseY > screenHeight / 2 + 130 && mouseY < screenHeight / 2 + 190;
 
         // Play notification sound if the mouse is over the button for the first time
         if (mouseOverstartButton && !mouseWasOverstartButton) {
@@ -200,23 +225,60 @@ public class Main extends PApplet {
         }
         mouseWasOverExitButton = mouseOverExitButton;
 
+        // Play notification sound if the mouse is over the exit button for the first time
+        if (mouseOverHelpButton && !mouseWasOverHelpButton) {
+            notificationSound.play();
+        }
+        mouseWasOverHelpButton = mouseOverHelpButton;
+
         // Start button text
         textFont(pressStartFont, mouseOverstartButton ? 20 : 18);
-        fill(255, 255,255); // Change the button text color to white
+        fill(255, 255, 255); // Change the button text color to white
         text("Start Game", screenWidth / 2, screenHeight / 2 + 6);
 
         // Exit button text
         textFont(pressStartFont, mouseOverExitButton ? 20 : 18);
-        fill(255, 255,255); // Change the button text color to white
+        fill(255, 255, 255); // Change the button text color to white
         text("Exit Game", screenWidth / 2, screenHeight / 2 + 86);
+
+        // Help button text
+        textFont(pressStartFont, mouseOverHelpButton ? 18 : 15);
+        fill(255, 255, 255); // Change the button text color to white
+        text(" Help \n press 'h' ", screenWidth / 2, screenHeight / 2 + 160);
     }
 
-    private void drawGameOverMessage() {
+    public void drawHelp() {
         background(0);
         textSize(24);
         fill(255);
         textAlign(CENTER, CENTER);
-        text("GAME OVER", screenWidth / 2, screenHeight / 2);
+        text("Help", screenWidth / 2, screenHeight / 4);
+        textSize(8);
+        text("Click anywhere on the screen or press the space key to shoot.\n\nMove the spaceship left and right using the mouse.\n\nEliminate all the chickens to win the game.\n\nComplete all waves to win the game.", screenWidth / 2, screenHeight / 2 - 50);
+
+        // Exit option
+        textSize(15);
+        fill(255);
+        text("Back \n press anykey ", width / 2, height / 2 + 300);
+    }
+
+    private void drawGameOverMessage() {
+
+        background(0);
+        textSize(24);
+        fill(255);
+        textAlign(CENTER, CENTER);
+        text("GAME OVER", screenWidth / 2, screenHeight / 2 - 50);
+        text("Score: " + score.getCurrentScore(), screenWidth / 2, screenHeight / 2);
+
+        int minutes = frameCount / 60;
+        int seconds = frameCount % 60;
+        String timePlayed = String.format("Time Played: %02d:%02d", minutes, seconds);
+        textSize(18);
+        fill(255);
+        text(timePlayed, screenWidth / 2, screenHeight / 2 + 50);
+
+        noLoop();
     }
 
     private void drawGameWonMessage() {
@@ -224,7 +286,17 @@ public class Main extends PApplet {
         textSize(24);
         fill(255);
         textAlign(CENTER, CENTER);
-        text("YOU WIN!", screenWidth / 2, screenHeight / 2);
+        text("YOU WIN!", screenWidth / 2, screenHeight / 2 - 50);
+        text("Score: " + score.getCurrentScore(), screenWidth / 2, screenHeight / 2);
+
+        int minutes = frameCount / 60;
+        int seconds = frameCount % 60;
+        String timePlayed = String.format("Time Played: %02d:%02d", minutes, seconds);
+        textSize(18);
+        fill(255);
+        text(timePlayed, screenWidth / 2, screenHeight / 2 + 50);
+
+        noLoop();
     }
 
     public void mouseClicked() {
@@ -237,6 +309,11 @@ public class Main extends PApplet {
             // Check if the mouse was clicked inside the exit button
             if (mouseX > screenWidth / 2 - 100 && mouseX < screenWidth / 2 + 100 && mouseY > screenHeight / 2 + 50 && mouseY < screenHeight / 2 + 110) {
                 exit();
+            }
+
+            // Check if the mouse was clicked inside the help button
+            if (mouseX > screenWidth / 2 - 100 && mouseX < screenWidth / 2 + 100 && mouseY > screenHeight / 2 + 130 && mouseY < screenHeight / 2 + 190) {
+                drawHelp();
             }
         }
     }
@@ -257,11 +334,13 @@ public class Main extends PApplet {
                 missiles.add(new Missile(missileX, missileY));
             }
         }
+        else if (key == 'h') {
+            drawHelp();
+        }
     }
 
-    public void settings() {
-        size(screenWidth, screenHeight);
-    }
+    public void settings()
+    {size(screenWidth, screenHeight);}
 
     public static void main(String[] args) {
         PApplet.main("Main", args);
