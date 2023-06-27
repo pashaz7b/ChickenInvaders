@@ -9,5 +9,8 @@
         <module name="ChickenInvaders" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="ChickenInvaders" target="17" />
+    </bytecodeTargetLevel>
   </component>
 </project>

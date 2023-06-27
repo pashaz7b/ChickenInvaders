@@ -6,6 +6,7 @@ public class Score {
     private static final String DB_USER = "root";
     private static final String DB_PASSWORD = "pashaz7b";
     private int currentScore;
+    public static boolean flag = false;
 
     public Score() {
         this.currentScore = 0;
@@ -39,9 +40,7 @@ public class Score {
 
     public void saveScore() {
         try {
-
             Class.forName("com.mysql.cj.jdbc.Driver");
-
             Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
             Statement stmt = conn.createStatement();
             String query = "INSERT INTO `scores`.`scores` (`score`) VALUES (" + currentScore + ");";
@@ -60,7 +59,7 @@ public class Score {
         try {
             Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
             Statement stmt = conn.createStatement();
-            String query = "SELECT MAX(score) FROM scores";
+            String query = "SELECT * FROM scores.scores WHERE score = (SELECT MAX(score) FROM scores.scores) LIMIT 1;";
             ResultSet rs = stmt.executeQuery(query);
             if (rs.next()) {
                 highScore = rs.getInt(1);
@@ -78,8 +77,9 @@ public class Score {
             try {
                 Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
                 Statement stmt = conn.createStatement();
-                String query = String.format("UPDATE scores SET score = %d WHERE score = %d", currentScore, currentHighScore);
+                String query = String.format("UPDATE scores.scores SET score = ? WHERE score = ?;", currentScore, currentHighScore);
                 stmt.executeUpdate(query);
+                flag = true;
                 conn.close();
             } catch (SQLException e) {
                 e.printStackTrace();
