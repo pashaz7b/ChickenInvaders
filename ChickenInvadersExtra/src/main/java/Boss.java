@@ -1,6 +1,6 @@
 import processing.core.PImage;
 
-public class Boss  {
+public class Boss implements BossInterface {
 
     public static PImage bossImage;
     private final int width = 120; // Boss width (double the chicken width)
@@ -84,4 +84,5 @@ public class Boss  {
     public void setResistance(int resistance) {
         this.resistance = resistance;
     }
+
 }

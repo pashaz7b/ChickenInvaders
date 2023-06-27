@@ -1,11 +1,11 @@
 import java.util.*;
 
-public interface ChickenInterface {
-    //chicken part
-    void createChickens();
+public interface BossInterface {
 
     void update(int screenWidth);
 
     void display(int screenWidth);
+
+    void decreaseResistance();
 
 }

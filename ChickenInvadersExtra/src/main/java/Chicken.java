@@ -1,18 +1,19 @@
 import java.util.*;
+
 import processing.core.PImage;
 
 public class Chicken implements ChickenInterface {
 
     public static ArrayList<Chicken> chickens = new ArrayList<>();
     public static PImage chickenImage;
-    private final int width =60;
+    private final int width = 60;
     private final int height = 48;
     private float x;
     private float y;
     private float speedX;
     private int resistance;
 
-    public Chicken(float x, float y,int resistance) {
+    public Chicken(float x, float y, int resistance) {
         this.x = x;
         this.y = y;
         this.resistance = resistance;
@@ -32,7 +33,7 @@ public class Chicken implements ChickenInterface {
             for (int j = 0; j < cols; j++) {
                 float x = startX + j * xOffset;
                 float y = startY + i * yOffset;
-                chickens.add(new Chicken(x, y,resistance));
+                chickens.add(new Chicken(x, y, resistance));
             }
         }
     }

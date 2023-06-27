@@ -1,7 +1,8 @@
 import java.util.*;
+
 import processing.core.PImage;
 
-public class Spaceship implements SpaceshipInterface{
+public class Spaceship implements SpaceshipInterface {
     public static PImage spaceshipImage;
     private final int width = 400;
     private final int height = 700;
