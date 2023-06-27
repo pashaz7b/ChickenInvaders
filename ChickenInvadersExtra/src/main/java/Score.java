@@ -16,6 +16,10 @@ public class Score {
         return currentScore;
     }
 
+    public void setCurrentScore(int currentScore) {
+        this.currentScore = currentScore;
+    }
+
     public void increaseScore(int waveNumber) {
         switch (waveNumber) {
             case 1:

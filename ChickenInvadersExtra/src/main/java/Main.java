@@ -26,8 +26,9 @@ public class Main extends PApplet {
     private boolean gameWon = false;
     private SoundFile chickenHitSound;
     float time = 400;
-    float changeTime = 1.0f;
+    float changeTime = 0.08f;
     PImage gameBackground;
+    public Boss boss;
 
     public void setup() {
         pApplet = this;
@@ -44,6 +45,7 @@ public class Main extends PApplet {
         notificationSound = new SoundFile(this, "notification_sound.wav");
         chickenHitSound = new SoundFile(this, "chicken_hit_sound.wav");
         gameBackground = loadImage("gameBackground.jpg");
+        Boss.bossImage = loadImage("Boss.png");
     }
 
     public void draw() {
@@ -67,6 +69,9 @@ public class Main extends PApplet {
             noStroke();
             checkCollisions();
             checkGameOver();
+            if (boss != null) {
+                boss.display(screenWidth);
+            }
         } else if (gameOver) {
             score.saveScore();
             score.updateHighScore();
@@ -106,6 +111,20 @@ public class Main extends PApplet {
         return leftSpaceship < rightChicken && rightSpaceship > leftChicken && topSpaceship < bottomChicken && bottomSpaceship > topChicken;
     }
 
+    private boolean collides(Boss boss, Missile missile) {
+        float leftBoss = boss.getX();
+        float rightBoss = boss.getX() + boss.getWidth();
+        float topBoss = boss.getY();
+        float bottomBoss = boss.getY() + boss.getHeight();
+
+        float leftMissile = missile.getX();
+        float rightMissile = missile.getX() + missile.getMissileWidth();
+        float topMissile = missile.getY();
+        float bottomMissile = missile.getY() + missile.getMissileHeight();
+
+        return leftMissile < rightBoss && rightMissile > leftBoss && topMissile < bottomBoss && bottomMissile > topBoss;
+    }
+
     private void checkCollisions() {
         int chickensPerWave = 4 * 4; // This should match the rows * cols in createChickens()
 
@@ -137,13 +156,46 @@ public class Main extends PApplet {
         }
 
         // Check if all chickens are killed and start the next wave if there are more waves
-        if (killedChickens == chickensPerWave && currentWave < totalWaves) {
+        if (killedChickens == chickensPerWave) {
+            nextWave();
+        }
+
+        if (boss != null) {
+            Iterator<Missile> missileIterator = missiles.iterator();
+            while (missileIterator.hasNext()) {
+                Missile currentMissile = missileIterator.next();
+
+                // Check for collision between the boss and missile
+                if (collides(boss, currentMissile)) {
+                    // Decrease the boss's resistance
+                    boss.decreaseResistance();
+                    missileIterator.remove();
+
+                    // Increment the score by 10
+                    score.setCurrentScore(score.getCurrentScore()+10);
+
+                    // If the boss's resistance reaches 0, remove the boss and set the gameWon flag
+                    if (boss.getResistance() == 0) {
+                        boss = null;
+                        gameWon = true;
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    private void nextWave() {
+        if (currentWave < totalWaves) {
             currentWave++;
             updateChickenImage(); // Update the chicken image
             chicken.createChickens();
-            killedChickens = 0;
-        } else if (killedChickens == chickensPerWave && currentWave == totalWaves) {
-            gameWon = true;
+            killedChickens = 0; // Reset the killedChickens count
+        } else {
+            // Create the boss
+            if (boss == null) {
+                boss = new Boss(screenWidth / 2.0f - 60, 50, 20); // Set the initial position and resistance
+            }
         }
     }
 
