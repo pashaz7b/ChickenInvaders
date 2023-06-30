@@ -1,42 +1,42 @@
 import processing.core.*;
 import processing.sound.*;
-
 import java.util.*;
 
 public class Main extends PApplet {
     public static PApplet pApplet;
-
-    private final int screenWidth = 400;
-    private final int screenHeight = 700;
+    public final int screenWidth = 400;
+    public final int screenHeight = 700;
     public Chicken chicken;
     public Spaceship spaceship;
-    private ArrayList<Missile> missiles = new ArrayList<>();
-    private boolean startMenu = true;
-    private PFont pressStartFont;
-    private PImage startMenuBackground;
-    private SoundFile notificationSound;
-    private boolean mouseWasOverstartButton = false;
-    private boolean mouseWasOverExitButton = false;
-    private boolean mouseWasOverHelpButton = false;
-    private boolean mouseWasOverScoresButton = false;
-    private boolean gameOver = false;
+    public ArrayList<Missile> missiles = new ArrayList<>();
+    public boolean startMenu = true;
+    public PFont pressStartFont;
+    public PImage startMenuBackground;
+    public SoundFile notificationSound;
+    public boolean mouseWasOverstartButton = false;
+    public boolean mouseWasOverExitButton = false;
+    public boolean mouseWasOverHelpButton = false;
+    public boolean mouseWasOverScoresButton = false;
+    public boolean gameOver = false;
     public static int currentWave = 1;
-    private int killedChickens = 0;
-    private final int totalWaves = 3;
+    public int killedChickens = 0;
+    public final int totalWaves = 3;
     public static String[] chickenImages = {"chicken1.png", "chicken2.png", "chicken3.png"};
     Score score = new Score();
-    private boolean gameWon = false;
-    private SoundFile chickenHitSound;
-    float time = 400;
-    float changeTime = 0.08f;
+    public boolean gameWon = false;
+    public SoundFile chickenHitSound;
+    public float time = 400;
+    public float changeTime = 0.08f;
     PImage gameBackground;
     public Boss boss;
     boolean displayHelp = false;
     boolean displayScores = false;
     boolean mouseWasOverBackButton = false;
     public int currentHighScore = 0;
+    boolean bossFightTime = false;
+    boolean mouseWasOverFinalExitButton = false;
 
-    public void setup() {
+    public void setup()  {
         pApplet = this;
         chicken = new Chicken(0, 0, currentWave);
         Spaceship.spaceshipImage = loadImage("spaceship1.png");
@@ -63,7 +63,9 @@ public class Main extends PApplet {
             drawScores();
         } else if (!gameOver && !gameWon) {
             background(gameBackground);
+            if(!bossFightTime){
             drawWaveInfo();
+            }
             score.drawScoreInfo();
             chicken.display(screenWidth);
             spaceship.drawSpaceship();
@@ -80,6 +82,7 @@ public class Main extends PApplet {
             checkGameOver();
             if (boss != null) {
                 boss.display(screenWidth);
+                drawBossInfo();
             }
         } else if (gameOver) {
             score.saveScore();
@@ -90,7 +93,7 @@ public class Main extends PApplet {
         }
     }
 
-    private boolean collides(Chicken chicken, Missile missile) {
+    public boolean collides(Chicken chicken, Missile missile) {
         float leftChicken = chicken.getX();
         float rightChicken = chicken.getX() + chicken.getWidth();
         float topChicken = chicken.getY();
@@ -104,7 +107,7 @@ public class Main extends PApplet {
         return leftMissile < rightChicken && rightMissile > leftChicken && topMissile < bottomChicken && bottomMissile > topChicken;
     }
 
-    private boolean collidesWithSpaceship(Chicken chicken, Spaceship spaceship) {
+    public boolean collidesWithSpaceship(Chicken chicken, Spaceship spaceship) {
         float leftChicken = chicken.getX();
         float rightChicken = chicken.getX() + chicken.getWidth();
         float topChicken = chicken.getY();
@@ -118,7 +121,25 @@ public class Main extends PApplet {
         return leftSpaceship < rightChicken && rightSpaceship > leftChicken && topSpaceship < bottomChicken && bottomSpaceship > topChicken;
     }
 
-    private boolean collides(Boss boss, Missile missile) {
+    public boolean collidesWithSpaceship(Boss boss, Spaceship spaceship) {
+        if (boss == null || spaceship == null) {
+            return false;
+        }
+
+        float leftBoss = boss.getX();
+        float rightBoss = boss.getX() + boss.getWidth();
+        float topBoss = boss.getY();
+        float bottomBoss = boss.getY() + boss.getHeight();
+
+        float leftSpaceship = spaceship.getxPos();
+        float rightSpaceship = spaceship.getxPos() + spaceship.getSpaceshipWidth();
+        float topSpaceship = spaceship.getyPos();
+        float bottomSpaceship = spaceship.getyPos() + spaceship.getSpaceshipHeight();
+
+        return leftSpaceship < rightBoss && rightSpaceship > leftBoss && topSpaceship < bottomBoss && bottomSpaceship > topBoss;
+    }
+
+    public boolean collides(Boss boss, Missile missile) {
         float leftBoss = boss.getX();
         float rightBoss = boss.getX() + boss.getWidth();
         float topBoss = boss.getY();
@@ -132,7 +153,7 @@ public class Main extends PApplet {
         return leftMissile < rightBoss && rightMissile > leftBoss && topMissile < bottomBoss && bottomMissile > topBoss;
     }
 
-    private void checkCollisions() {
+    public void checkCollisions() {
         int chickensPerWave = 4 * 4; // This should match the rows * cols in createChickens()
 
         Iterator<Chicken> chickenIterator = Chicken.chickens.iterator();
@@ -193,7 +214,7 @@ public class Main extends PApplet {
         }
     }
 
-    private void nextWave() {
+    public void nextWave() {
         if (currentWave < totalWaves) {
             currentWave++;
             updateChickenImage(); // Update the chicken image
@@ -203,11 +224,19 @@ public class Main extends PApplet {
             // Create the boss
             if (boss == null) {
                 boss = new Boss(screenWidth / 2.0f - 60, 50, 30); // Set the initial position and resistance
+                bossFightTime = true;
             }
         }
     }
 
-    private void checkGameOver() {
+    public void drawBossInfo(){
+        textFont(pressStartFont,12);
+        fill(255,0,0);
+        text("Boss Life :" + boss.getResistance(),320,20);
+        
+    }
+
+    public void checkGameOver() {
         for (Chicken currentChicken : Chicken.chickens) {
             // Check if the chicken touched the spaceship
             if (collidesWithSpaceship(currentChicken, spaceship)) {
@@ -227,6 +256,11 @@ public class Main extends PApplet {
                 break;
             }
         }
+
+        // Check if the boss touched the spaceship
+        if (!gameOver && collidesWithSpaceship(boss, spaceship)) {
+            gameOver = true;
+        }
     }
 
     public void updateChickenImage() {
@@ -236,7 +270,7 @@ public class Main extends PApplet {
         }
     }
 
-    private void drawWaveInfo() {
+    public void drawWaveInfo() {
         pApplet.textSize(14);
         pApplet.fill(255, 0, 0); // White text color
         pApplet.text("Wave:" + currentWave, 350, 20); // Display the wave number at the top-left corner
@@ -382,7 +416,7 @@ public class Main extends PApplet {
         text("Back", screenWidth / 2, screenHeight - 100);
     }
 
-    private void drawGameOverMessage() {
+    public void drawGameOverMessage() {
 
         background(0);
         textSize(24);
@@ -399,13 +433,34 @@ public class Main extends PApplet {
         text(timePlayed, screenWidth / 2, screenHeight / 2 + 50);
 
         if (score.getCurrentScore() >= currentHighScore) {
-            text("HighScore: " + score.getCurrentScore(), screenWidth / 2, screenHeight / 2 + 100);
+            textSize(12);
+            text("You Got HighScore: " + score.getCurrentScore(), screenWidth / 2, screenHeight / 2 + 100);
         }
+
+        // Back button background
+        noStroke();
+        fill(255, 0, 0, 180); // Change the button background color to a lighter red
+        rectMode(CENTER);
+        rect(screenWidth / 2, screenHeight - 100, 200, 60, 10);
+
+        // Check if the mouse is over the back button
+        boolean mouseOverExitButton = mouseX > screenWidth / 2 - 100 && mouseX < screenWidth / 2 + 100 && mouseY > screenHeight - 130 && mouseY < screenHeight - 70;
+
+        // Play notification sound if the mouse is over the back button for the first time
+        if (mouseOverExitButton && !mouseWasOverFinalExitButton) {
+            notificationSound.play();
+        }
+        mouseWasOverFinalExitButton = mouseOverExitButton;
+
+        // Back button text
+        textFont(pressStartFont, mouseOverExitButton ? 20 : 18);
+        fill(255, 255, 255); // Change the button text color to white
+        text("Exit", screenWidth / 2, screenHeight - 100);
 
         noLoop();
     }
 
-    private void drawGameWonMessage() {
+    public void drawGameWonMessage() {
         background(0);
         textSize(24);
         fill(255);
@@ -424,6 +479,26 @@ public class Main extends PApplet {
             textSize(12);
             text("You Got HighScore: " + score.getCurrentScore(), screenWidth / 2, screenHeight / 2 + 100);
         }
+
+        // Back button background
+        noStroke();
+        fill(255, 0, 0, 180); // Change the button background color to a lighter red
+        rectMode(CENTER);
+        rect(screenWidth / 2, screenHeight - 100, 200, 60, 10);
+
+        // Check if the mouse is over the back button
+        boolean mouseOverExitButton = mouseX > screenWidth / 2 - 100 && mouseX < screenWidth / 2 + 100 && mouseY > screenHeight - 130 && mouseY < screenHeight - 70;
+
+        // Play notification sound if the mouse is over the back button for the first time
+        if (mouseOverExitButton && !mouseWasOverFinalExitButton) {
+            notificationSound.play();
+        }
+        mouseWasOverFinalExitButton = mouseOverExitButton;
+
+        // Back button text
+        textFont(pressStartFont, mouseOverExitButton ? 20 : 18);
+        fill(255, 255, 255); // Change the button text color to white
+        text("Exit", screenWidth / 2, screenHeight - 100);
 
         noLoop();
     }
@@ -462,6 +537,10 @@ public class Main extends PApplet {
             if (mouseX > screenWidth / 2 - 100 && mouseX < screenWidth / 2 + 100 && mouseY > screenHeight - 130 && mouseY < screenHeight - 70) {
                 displayScores = false;
                 startMenu = true;
+            }
+        } else if (gameWon || gameOver){
+            if (mouseX > screenWidth / 2 - 100 && mouseX < screenWidth / 2 + 100 && mouseY > screenHeight - 130 && mouseY < screenHeight - 70) {
+                exit();
             }
         }
     }

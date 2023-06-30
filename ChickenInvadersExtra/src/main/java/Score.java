@@ -99,11 +99,21 @@ public class Score {
         try {
             Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
             Statement stmt = conn.createStatement();
-            String query = "SELECT * FROM scores.scores WHERE score = (SELECT MAX(score) FROM scores.scores) LIMIT 1;";
+
+            // Get all the rows from the scores.scores table
+            String query = "SELECT id, score FROM scores.scores;";
             ResultSet rs = stmt.executeQuery(query);
-            if (rs.next()) {
-                highScore = rs.getInt(1);
+
+            // Iterate through the result set and find the highest score
+            while (rs.next()) {
+                int score = rs.getInt("score");
+                if (score > highScore) {
+                    highScore = score;
+                    int id = rs.getInt("id");
+                    System.out.println("New high score found. ID: " + id + ", Score: " + highScore);
+                }
             }
+
             conn.close();
         } catch (SQLException e) {
             e.printStackTrace();
